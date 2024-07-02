@@ -24,7 +24,7 @@
 
 ### Running the Visualization
 
-Run the `main.py` script to start the visualization:
+Run the `AlgorithmAnimation.py` script to start the visualization:
 
 ```bash
 python AlgorithmAnimation.py
