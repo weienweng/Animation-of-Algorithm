@@ -12,8 +12,8 @@
 1. Clone the repository:
 
     ```bash
-    git clone <repository_url>
-    cd sorting-visualization
+    git clone https://github.com/weienweng/Animation-of-Algorithm.git
+    cd Animation-of-Algorithm
     ```
 
 2. Install the required library:
@@ -27,5 +27,5 @@
 Run the `main.py` script to start the visualization:
 
 ```bash
-python main.py
+python AlgorithmAnimation.py
 ```
