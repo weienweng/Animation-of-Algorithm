@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Algorithms Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #sortingCanvas {
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sorting Algorithms Visualization</h1>
+        <div class="controls">
+            <button id="exchangeSort">Exchange Sort</button>
+            <button id="bubbleSort">Bubble Sort</button>
+            <button id="selectionSort">Selection Sort</button>
+            <button id="reset">Reset</button>
+            <button id="shuffle">Shuffle</button>
+        </div>
+        <canvas id="sortingCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('sortingCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const WHITE = '#FFFFFF';
+        const BLACK = '#000000';
+        const GRAY = '#C8C8C8';
+        const RED = '#FF0000';
+        const GREEN = '#00FF00';
+        const BLUE = '#0000FF';
+
+        let WIDTH = 1200;
+        let HEIGHT = 600;
+        let BLOCK_WIDTH = 60;
+        let BLOCK_HEIGHT = 60;
+        let SPACING = 5;
+
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+
+        let blocks = [];
+        let sorting = false;
+
+        class Block {
+            constructor(x, y, value) {
+                this.x = x;
+                this.y = y;
+                this.value = value;
+                this.color = GRAY;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, BLOCK_WIDTH, BLOCK_HEIGHT);
+                ctx.strokeStyle = BLACK;
+                ctx.strokeRect(this.x, this.y, BLOCK_WIDTH, BLOCK_HEIGHT);
+                ctx.fillStyle = BLACK;
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.value, this.x + BLOCK_WIDTH / 2, this.y + BLOCK_HEIGHT / 2);
+            }
+
+            async moveTo(newX, newY, steps = 10) {
+                const startX = this.x;
+                const startY = this.y;
+                for (let i = 0; i <= steps; i++) {
+                    this.x = startX + (newX - startX) * i / steps;
+                    this.y = startY + (newY - startY) * i / steps;
+                    drawBlocks();
+                    await new Promise(resolve => setTimeout(resolve, 5));
+                }
+                this.x = newX;
+                this.y = newY;
+            }
+        }
+
+        function initializeBlocks() {
+            blocks = [];
+            for (let i = 0; i < 15; i++) {
+                const value = Math.floor(Math.random() * 99) + 1;
+                const x = i * (BLOCK_WIDTH + SPACING) + SPACING;
+                const y = HEIGHT / 2 - BLOCK_HEIGHT / 2;
+                blocks.push(new Block(x, y, value));
+            }
+        }
+
+        function drawBlocks() {
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+            blocks.forEach(block => block.draw());
+        }
+
+        function displaySortTitle(title) {
+            ctx.fillStyle = BLACK;
+            ctx.font = '24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, WIDTH / 2, 30);
+        }
+
+        async function exchangeSort() {
+            const n = blocks.length;
+            for (let i = 0; i < n; i++) {
+                for (let j = i + 1; j < n; j++) {
+                    blocks[i].color = RED;
+                    blocks[j].color = GREEN;
+                    drawBlocks();
+                    displaySortTitle('Exchange Sort');
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    if (blocks[i].value > blocks[j].value) {
+                        blocks[i].color = GREEN;
+                        blocks[j].color = RED;
+                        drawBlocks();
+                        displaySortTitle('Exchange Sort');
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        const tempX = blocks[i].x;
+                        const tempY = blocks[i].y;
+                        await blocks[i].moveTo(blocks[j].x, tempY);
+                        await blocks[j].moveTo(tempX, tempY);
+                        [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+                    }
+                    blocks[i].color = GRAY;
+                    blocks[j].color = GRAY;
+                }
+            }
+            blocks.forEach(block => block.color = BLUE);
+            drawBlocks();
+            displaySortTitle('Exchange Sort - Complete');
+        }
+
+        async function bubbleSort() {
+            const n = blocks.length;
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n - i - 1; j++) {
+                    blocks[j].color = RED;
+                    blocks[j + 1].color = GREEN;
+                    drawBlocks();
+                    displaySortTitle('Bubble Sort');
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    if (blocks[j].value > blocks[j + 1].value) {
+                        blocks[j].color = GREEN;
+                        blocks[j + 1].color = RED;
+                        drawBlocks();
+                        displaySortTitle('Bubble Sort');
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        const tempX = blocks[j].x;
+                        const tempY = blocks[j].y;
+                        await blocks[j].moveTo(blocks[j + 1].x, tempY);
+                        await blocks[j + 1].moveTo(tempX, tempY);
+                        [blocks[j], blocks[j + 1]] = [blocks[j + 1], blocks[j]];
+                    }
+                    blocks[j].color = GRAY;
+                    blocks[j + 1].color = GRAY;
+                }
+            }
+            blocks.forEach(block => block.color = BLUE);
+            drawBlocks();
+            displaySortTitle('Bubble Sort - Complete');
+        }
+
+        async function selectionSort() {
+            const n = blocks.length;
+            for (let i = 0; i < n; i++) {
+                let minIdx = i;
+                blocks[i].color = RED;
+                for (let j = i + 1; j < n; j++) {
+                    blocks[j].color = GREEN;
+                    drawBlocks();
+                    displaySortTitle('Selection Sort');
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    if (blocks[j].value < blocks[minIdx].value) {
+                        blocks[minIdx].color = GRAY;
+                        minIdx = j;
+                        blocks[minIdx].color = RED;
+                    } else {
+                        blocks[j].color = GRAY;
+                    }
+                }
+                if (minIdx !== i) {
+                    blocks[i].color = GREEN;
+                    blocks[minIdx].color = RED;
+                    drawBlocks();
+                    displaySortTitle('Selection Sort');
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    const tempX = blocks[i].x;
+                    const tempY = blocks[i].y;
+                    await blocks[i].moveTo(blocks[minIdx].x, tempY);
+                    await blocks[minIdx].moveTo(tempX, tempY);
+                    [blocks[i], blocks[minIdx]] = [blocks[minIdx], blocks[i]];
+                }
+                blocks[i].color = BLUE;
+            }
+            drawBlocks();
+            displaySortTitle('Selection Sort - Complete');
+        }
+
+        function resizeCanvas() {
+            WIDTH = window.innerWidth * 0.9;
+            HEIGHT = window.innerHeight * 0.7;
+            canvas.width = WIDTH;
+            canvas.height = HEIGHT;
+            BLOCK_WIDTH = Math.min(60, (WIDTH - SPACING * (blocks.length + 1)) / blocks.length);
+            BLOCK_HEIGHT = Math.min(60, HEIGHT / 3);
+            blocks.forEach((block, i) => {
+                block.x = i * (BLOCK_WIDTH + SPACING) + SPACING;
+                block.y = HEIGHT / 2 - BLOCK_HEIGHT / 2;
+            });
+            drawBlocks();
+        }
+
+        function shuffleBlocks() {
+            for (let i = blocks.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+            }
+            blocks.forEach((block, i) => {
+                block.x = i * (BLOCK_WIDTH + SPACING) + SPACING;
+                block.y = HEIGHT / 2 - BLOCK_HEIGHT / 2;
+                block.color = GRAY;
+            });
+            drawBlocks();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        document.getElementById('exchangeSort').addEventListener('click', async () => {
+            if (!sorting) {
+                sorting = true;
+                await exchangeSort();
+                sorting = false;
+            }
+        });
+
+        document.getElementById('bubbleSort').addEventListener('click', async () => {
+            if (!sorting) {
+                sorting = true;
+                await bubbleSort();
+                sorting = false;
+            }
+        });
+
+        document.getElementById('selectionSort').addEventListener('click', async () => {
+            if (!sorting) {
+                sorting = true;
+                await selectionSort();
+                sorting = false;
+            }
+        });
+
+        document.getElementById('reset').addEventListener('click', () => {
+            sorting = false;
+            initializeBlocks();
+            drawBlocks();
+        });
+
+        document.getElementById('shuffle').addEventListener('click', () => {
+            if (!sorting) {
+                shuffleBlocks();
+            }
+        });
+
+        initializeBlocks();
+        resizeCanvas();
+        drawBlocks();
+    </script>
+</body>
+</html>
